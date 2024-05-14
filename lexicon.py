@@ -56,13 +56,14 @@ class Word(AbstractWord):
     
 # Write your build_lexicon() solution here (and any other functions as you see fit)
 
-def merge_sort(lst, first, last):
+class Sort(Word):
+  def merge_sort(lst, first, last):
     if first == last:
         return
 
     mid = (first + last) // 2
-    merge_sort(lst, first, mid)
-    merge_sort(lst, mid + 1, last)
+    Sort.merge_sort(lst, first, mid)
+    Sort.merge_sort(lst, mid + 1, last)
 
     merge(lst, first, mid, last)
     return lst
@@ -96,33 +97,40 @@ def merge(lst, left, mid, right):
     for idx in range(left, right + 1):
         lst[idx] = temp[idx - left]
 
-class Sort(Word):
-  def sorting_algorithm(w):
+def sorting_algorithm(w):
           first=0
           last=len(w) - 1
           lst = []
-          lst = merge_sort(w, first, last)
+          lst = Sort.merge_sort(w, first, last)
           print("Sorting with Merge Sort")
           return lst
 
 # Write your add_neighbours() function here
 class NeightbourWord(Word):
+  
+  def one_letter_diff(word1, word2):
+    if len(word1) != len(word2):
+        return False
+
+    diff_count = 0
+    for char1, char2 in zip(word1, word2):
+        if char1 != char2:
+            diff_count += 1
+            if diff_count > 1:
+                return False
+
+    return diff_count == 1
+  
   def add_neighbours(l):
       results = []
-
       for i in l:
           neightbour_word=[]
           for j in l:
-              same_chars=0
-              founds = []
-              for k in i:
-                  found = j.find(k)
-                  if(found>=0):
-                      founds.append(found)
-                      same_chars=same_chars+1
-              if(same_chars>=2 and len(j)==len(i) and founds[0]-founds[1]<0):
-                  neightbour_word.append(j)
-          results.append(neightbour_word)
+              if(NeightbourWord.one_letter_diff(i,j)):
+                if(len(j)>0):
+                    neightbour_word.append(j)
+          if(len(neightbour_word)>0):
+           results.append(neightbour_word)
       return results
 
   # Call your add_neighbours() function with your lexicon
