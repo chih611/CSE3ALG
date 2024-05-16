@@ -9,11 +9,11 @@ class AbstractWord:
         pass
 
     @abstractmethod
-    def create_lexicon(self):
-        pass
+    def one_letter_diff(self):
+       pass
 
     @abstractmethod
-    def sorting_algorithm(self):
+    def create_lexicon(self):
         pass
 
     @abstractmethod
@@ -27,7 +27,48 @@ class AbstractWord:
     @abstractmethod
     def read_data(self):
       pass
-    
+
+
+class AVLNode:
+    def __init__(self, data):
+        self.data = data
+        self.left = None
+        self.right = None
+class AVLTree(AbstractWord):
+    def __init__(self):
+        self.root = None
+        self.nodes = []
+    def traverse_in_order(self, node='root'):
+        if node == 'root':
+            node = self.root
+        if node is not None:
+            self.traverse_in_order(node.left)
+            self.traverse_in_order(node.right)
+            self.nodes.append(node.data)
+        return self.nodes
+    def insert(self, data):
+        new_node = AVLNode(data)
+        if self.root is None:
+            self.root = new_node
+            return
+
+        p = self.root
+
+        while True:
+            if data <= p.data and p.left is not None:
+                p = p.left
+            elif data > p.data and p.right is not None:
+                p = p.right
+            else:
+                break
+
+        if data <= p.data:
+            p.left = new_node
+        else:
+            p.right = new_node
+
+        # self.rebalance_insertion_path(new_node)
+
 class Word(AbstractWord):
     def __init__(self, fileName):
         self.fileName = fileName
@@ -42,68 +83,12 @@ class Word(AbstractWord):
           result.add(i.lower())
       return result
 
-    def create_lexicon(self):
+    def create_lexicon(self, tree  = AVLTree()):
       f = open(self.fileName, "r")
-      result=set((self.alphabet_filter(f.read())))
+      results=set((self.alphabet_filter(f.read())))
+      for i in results:
+        tree.insert(i)
       f.close()
-      return(result)
-
-    def read_data(self):
-      lexicon = []
-      for i in Word.create_lexicon(self):
-          lexicon.append(i)
-      return lexicon
-    
-# Write your build_lexicon() solution here (and any other functions as you see fit)
-
-class Sort(Word):
-  def merge_sort(lst, first, last):
-    if first == last:
-        return
-
-    mid = (first + last) // 2
-    Sort.merge_sort(lst, first, mid)
-    Sort.merge_sort(lst, mid + 1, last)
-
-    merge(lst, first, mid, last)
-    return lst
-
-def merge(lst, left, mid, right):
-
-    temp = []
-
-
-    left_idx = left
-    right_idx = mid + 1
-
-
-    while left_idx <= mid and right_idx <= right:
-        if lst[left_idx] <= lst[right_idx]:
-            temp.append(lst[left_idx])
-            left_idx += 1
-        else:
-            temp.append(lst[right_idx])
-            right_idx += 1
-
-
-    while left_idx <= mid:
-        temp.append(lst[left_idx])
-        left_idx += 1
-    while right_idx <= right:
-        temp.append(lst[right_idx])
-        right_idx += 1
-
-
-    for idx in range(left, right + 1):
-        lst[idx] = temp[idx - left]
-
-def sorting_algorithm(w):
-          first=0
-          last=len(w) - 1
-          lst = []
-          lst = Sort.merge_sort(w, first, last)
-          print("Sorting with Merge Sort")
-          return lst
 
 # Write your add_neighbours() function here
 class NeightbourWord(Word):
@@ -129,14 +114,15 @@ class NeightbourWord(Word):
               if(NeightbourWord.one_letter_diff(i,j)):
                 if(len(j)>0):
                     neightbour_word.append(j)
-          if(len(neightbour_word)>0):
-           results.append(neightbour_word)
+          results.append(neightbour_word)
       return results
 
   # Call your add_neighbours() function with your lexicon
   def read_data(self):
-      lexicons = Word.create_lexicon(self)
-      neighbours = NeightbourWord.add_neighbours(lexicons)
-      return neighbours
+      tree = AVLTree()
+      Word.create_lexicon(self, tree)
+      rs = tree.traverse_in_order()
+    #   neighbours = NeightbourWord.add_neighbours(rs)
+      return rs
 obj = NeightbourWord("in.txt")
 print(obj.read_data())
